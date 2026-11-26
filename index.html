@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060a1c">
+<meta name="robots" content="noindex, nofollow">
+<title>Secret Santa 2026</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%231e2f78'/%3E%3Cpath fill='%23eac67e' d='M12 3l2 4 4.3-1.3L17 10l4 2-4 2 1.3 4.3L14 17l-2 4-2-4-4.3 1.3L7 14l-4-2 4-2-1.3-4.3L10 7z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Figtree:wght@400..700&family=Vazirmatn:wght@300..700&family=Caveat:wght@500..700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   DESIGN TOKENS + BASE  ("Lapis & Saffron")
+   ========================================================================= */
+:root{
+  --night-0:#060a1c; --night-1:#0c1436; --night-2:#16215a; --lapis:#1e2f78; --lapis-2:#2c45a0;
+  --gold:#eac67e; --gold-hi:#fbe3a8; --gold-deep:#b48638;
+  --cream:#f8f0de; --paper:#fbf6ea; --paper-line:#e6dcc5; --ink:#221c38; --ink-soft:#5d5070;
+  --pom:#b3263e; --pom-deep:#7e1529; --pom-hi:#d8455b;
+  --turq:#52d6c8; --frost:#e4f0ff; --sun:#ffb65e; --coral:#ff8a5b; --sea:#2f9fb3;
+  --muted:#b9bfdc;            /* secondary text on night, 9.6:1 on --night-1 */
+  --f-display:"Fraunces", "Iowan Old Style", Georgia, serif;
+  --f-ui:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-fa:"Vazirmatn", "Tahoma", system-ui, sans-serif;
+  --f-hand:"Caveat", "Segoe Print", cursive;
+  --r-s:12px; --r-m:18px; --r-l:26px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+  --ease-out:cubic-bezier(.22,1,.36,1);       /* "settle"  */
+  --ease-in-out:cubic-bezier(.65,0,.35,1);    /* "glide"   */
+  --ease-spring:cubic-bezier(.34,1.56,.64,1); /* "pop"     */
+  --tap:56px;
+}
+*{box-sizing:border-box}
+html{background:var(--night-0)}
+body{margin:0;min-height:100vh;min-height:100svh;position:relative;display:flex;flex-direction:column}
+body{
+  font-family:var(--f-ui); color:var(--cream); background:var(--night-0);
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+[lang="fa"], .fa{font-family:var(--f-fa)}
+button{font:inherit;color:inherit}
+
+/* =========================================================================
+   BACKDROP — night sky, stars, drifting light, distant snow
+   ========================================================================= */
+.sky{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(120% 60% at 50% 112%, rgba(255,170,90,.22), rgba(255,170,90,0) 60%),  /* warm southern horizon */
+    radial-gradient(90% 50% at 15% 0%, rgba(82,214,200,.10), transparent 70%),
+    linear-gradient(180deg, var(--night-0) 0%, var(--night-1) 45%, var(--night-2) 82%, #2a2a6a 100%);
+}
+.sky .aurora{position:absolute;width:140vmax;height:60vmax;left:-20vmax;top:-18vmax;filter:blur(40px);opacity:.55;
+  background:
+    radial-gradient(40% 35% at 30% 50%, rgba(82,214,200,.18), transparent 70%),
+    radial-gradient(35% 30% at 70% 40%, rgba(120,110,255,.16), transparent 70%);
+  animation:aurora 38s var(--ease-in-out) infinite alternate}
+@keyframes aurora{to{transform:translate3d(8vmax,4vmax,0) rotate(6deg)}}
+.stars{position:absolute;inset:0}
+.stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.7;animation:twinkle var(--t,5s) ease-in-out var(--d,0s) infinite}
+.stars i.b{width:3px;height:3px;box-shadow:0 0 6px 1px rgba(255,235,190,.7)}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:.95}}
+.far-snow{position:absolute;inset:-10% 0 0 0;opacity:.35;
+  background-image:radial-gradient(1.4px 1.4px at 20px 30px,#fff 50%,transparent 51%),radial-gradient(1px 1px at 90px 120px,#fff 50%,transparent 51%),radial-gradient(1.8px 1.8px at 150px 60px,#fff 50%,transparent 51%),radial-gradient(1px 1px at 60px 170px,#fff 50%,transparent 51%);
+  background-size:200px 200px;animation:farsnow 40s linear infinite}
+.far-snow.l2{opacity:.18;background-size:340px 340px;animation-duration:70s;filter:blur(.6px)}
+@keyframes farsnow{to{background-position:60px 400px}}
+
+/* =========================================================================
+   STAGE — one persistent globe + scene panels
+   ========================================================================= */
+.stage{position:relative;z-index:1;flex:1 0 auto;width:100%;max-width:460px;margin:0 auto;
+  padding:calc(var(--s7) + env(safe-area-inset-top)) var(--s5) calc(var(--s6) + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;align-items:center}
+.globe-wrap{position:relative;width:min(68vw,300px);aspect-ratio:320/380;transition:width .9s var(--ease-out), margin .9s var(--ease-out);
+  margin:var(--s2) 0 var(--s4)}
+.globe-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+.stage[data-scene="letter"] .globe-wrap{width:118px;margin:0 0 calc(-1 * var(--s2))}
+.stage[data-scene="reveal"] .globe-wrap{width:150px;margin:0 0 var(--s2)}
+.stage[data-scene="waiting"] .globe-wrap,.stage[data-scene="shake"] .globe-wrap{width:min(86vw,350px)}
+
+.panel{display:none;width:100%;text-align:center}
+.stage[data-scene="loading"] .p-loading,.stage[data-scene="welcome"] .p-welcome,.stage[data-scene="letter"] .p-letter,.stage[data-scene="waiting"] .p-waiting,
+.stage[data-scene="shake"] .p-shake,.stage[data-scene="reveal"] .p-reveal{display:block;animation:panelIn .7s var(--ease-out) both}
+@keyframes panelIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ---- type ---- */
+.eyebrow{font:600 12px/1 var(--f-ui);letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.headline{font-family:var(--f-display);font-weight:380;font-style:italic;font-size:clamp(40px,11vw,56px);line-height:1.05;
+  font-variation-settings:"opsz" 144, "SOFT" 60;margin:var(--s3) 0 0;color:var(--cream);
+  text-shadow:0 0 28px rgba(234,198,126,.35);min-height:1.15em}
+.headline[lang="fa"]{font-family:var(--f-fa);font-style:normal;font-weight:500;font-size:clamp(36px,10vw,50px)}
+.lede{font:400 17px/1.5 var(--f-ui);color:var(--muted);margin:var(--s3) auto 0;max-width:30ch;min-height:3em}
+.lede[lang="fa"]{font-family:var(--f-fa);line-height:1.9;font-size:17px}
+.h2{font:400 26px/1.2 var(--f-display);font-variation-settings:"opsz" 72;margin:var(--s5) 0 var(--s4);color:var(--cream)}
+
+/* ---- name picker ---- */
+.names{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);margin-top:var(--s4)}
+.names .full{grid-column:1/-1}
+.name-btn{min-height:60px;border-radius:var(--r-m);border:1px solid rgba(234,198,126,.38);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));
+  font:420 22px/1 var(--f-display);font-variation-settings:"opsz" 48;color:var(--cream);cursor:pointer;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:transform .2s var(--ease-out),background .25s,border-color .25s,box-shadow .25s}
+.name-btn:hover{border-color:var(--gold);box-shadow:0 0 0 1px rgba(234,198,126,.3),0 8px 24px rgba(0,0,0,.25)}
+.name-btn:active{transform:scale(.97)}
+.name-btn:focus-visible,.btn:focus-visible,.link:focus-visible,input:focus-visible{outline:3px solid var(--gold-hi);outline-offset:3px}
+.name-btn[aria-pressed="true"]{background:linear-gradient(180deg,var(--gold-hi),var(--gold));color:var(--ink);border-color:var(--gold-hi)}
+.couple-rule{display:flex;align-items:center;gap:var(--s3);color:rgba(234,198,126,.55);margin:var(--s5) 0 0;font-size:13px}
+.couple-rule::before,.couple-rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(234,198,126,.4),transparent)}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--tap);padding:0 28px;border-radius:999px;border:0;cursor:pointer;
+  font:650 17px/1 var(--f-ui);letter-spacing:.01em;transition:transform .2s var(--ease-out),box-shadow .25s,filter .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(180deg,var(--pom-hi),var(--pom) 55%,var(--pom-deep));color:#fff7ea;box-shadow:0 10px 24px rgba(126,21,41,.45),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn-gold{background:linear-gradient(180deg,var(--gold-hi),var(--gold) 60%,var(--gold-deep));color:var(--ink);box-shadow:0 10px 28px rgba(234,198,126,.35),inset 0 1px 0 rgba(255,255,255,.6)}
+.btn-ghost{background:transparent;color:var(--cream);border:1px solid rgba(234,198,126,.45)}
+.btn.block{width:100%}
+.link{background:none;border:0;color:var(--muted);font:500 15px/1 var(--f-ui);text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(185,191,220,.5);cursor:pointer;padding:14px 10px;min-height:44px}
+.foot-links{display:flex;justify-content:center;gap:var(--s4);margin-top:var(--s3)}
+
+/* ---- letter ---- */
+.letter{position:relative;margin:var(--s4) auto 0;text-align:start;color:var(--ink);background:var(--paper);border-radius:8px;padding:28px 22px 22px;
+  transform:rotate(-.6deg);box-shadow:0 24px 50px rgba(0,0,0,.45),0 2px 0 rgba(255,255,255,.6) inset;
+  background-image:linear-gradient(180deg,rgba(234,198,126,.10),transparent 30%),
+    radial-gradient(120% 80% at 50% 0%,#fffdf6 0%,var(--paper) 60%,#f3e9d2 100%)}
+.letter::after{content:"";position:absolute;inset:8px;border:1px solid rgba(180,134,56,.35);border-radius:4px;pointer-events:none}
+.stamp{position:absolute;top:-14px;inset-inline-end:18px;width:56px;height:66px;transform:rotate(5deg);filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.dear{font:600 32px/1 var(--f-hand);color:var(--lapis);margin:0 0 6px;margin-inline-end:64px}
+.letter .lede{color:var(--ink-soft);margin:6px 0 18px;max-width:none;min-height:0;font-size:15.5px;text-align:start}
+.field{position:relative;margin:0 0 18px}
+.field label{display:block;font:700 11.5px/1 var(--f-ui);letter-spacing:.16em;text-transform:uppercase;color:#6e5b3a;margin-bottom:4px}
+.field input{width:100%;border:0;border-bottom:1.5px solid #cbb98f;background:transparent;font:600 26px/1.3 var(--f-hand), var(--f-fa);color:var(--ink);padding:6px 52px 6px 0;min-height:52px}
+.field input::placeholder{color:#b3a383;font-weight:500}
+.field input:focus{outline:none;border-bottom-color:var(--pom)}
+.field input:focus-visible{outline:none;box-shadow:0 2px 0 0 var(--pom)}
+.field .count{position:absolute;inset-inline-end:0;bottom:12px;font:500 12px/1 var(--f-ui);color:#7a6a4a}
+.signoff{font:600 26px/1 var(--f-hand);color:var(--lapis);text-align:end;margin:4px 6px 18px}
+
+/* envelope (flight) */
+.envelope{position:fixed;left:50%;top:50%;width:220px;margin:-70px 0 0 -110px;z-index:20;pointer-events:none;opacity:0}
+
+/* ---- waiting ---- */
+.counter{font:400 56px/1 var(--f-display);font-variation-settings:"opsz" 144;color:var(--gold-hi);margin:var(--s2) 0 0}
+.counter small{font-size:22px;color:var(--muted);font-family:var(--f-ui);font-weight:500}
+.deadline{display:inline-flex;align-items:center;gap:8px;margin-top:var(--s4);padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font:500 14.5px/1 var(--f-ui);color:var(--cream)}
+
+/* ---- shake ---- */
+.stage[data-scene="shake"] .globe-wrap.shaking{animation:globeShake 1.1s var(--ease-in-out)}
+@keyframes globeShake{0%{transform:none}12%{transform:translateX(-14px) rotate(-7deg)}28%{transform:translateX(12px) rotate(6deg)}44%{transform:translateX(-9px) rotate(-4deg)}60%{transform:translateX(6px) rotate(2.5deg)}78%{transform:translateX(-3px) rotate(-1deg)}100%{transform:none}}
+.hint{font:500 15px/1.4 var(--f-ui);color:var(--muted)}
+
+/* ---- reveal ---- */
+.card{position:relative;margin:var(--s3) auto 0;color:var(--ink);background:var(--paper);border-radius:22px;padding:34px 26px 28px;text-align:center;
+  box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 0 1px rgba(234,198,126,.6);
+  background-image:radial-gradient(130% 70% at 50% 0%,#fffdf7,var(--paper) 55%,#f4ead3)}
+.card::before{content:"";position:absolute;inset:10px;border:1.5px solid var(--gold);border-radius:14px;pointer-events:none}
+.card::after{content:"";position:absolute;inset:15px;border:.75px solid rgba(180,134,56,.5);border-radius:10px;pointer-events:none}
+.card .corner{position:absolute;width:22px;height:22px;color:var(--gold-deep)}
+.card .corner.tl{top:4px;left:4px}.card .corner.tr{top:4px;right:4px}.card .corner.bl{bottom:4px;left:4px}.card .corner.br{bottom:4px;right:4px}
+.card .eyebrow{color:var(--gold-deep)}
+.recipient{font:500 clamp(46px,13vw,60px)/1 var(--f-display);font-variation-settings:"opsz" 144,"SOFT" 30;color:var(--pom-deep);margin:12px 0 4px;letter-spacing:-.01em}
+.ornament{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--gold-deep);margin:14px 0 16px}
+.ornament::before,.ornament::after{content:"";width:64px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-deep))}
+.ornament::after{transform:scaleX(-1)}
+.wishes{list-style:none;margin:0;padding:0;text-align:start;display:grid;gap:12px}
+.wishes li{display:grid;grid-template-columns:34px 1fr;align-items:baseline;font:500 18px/1.4 var(--f-ui);color:var(--ink)}
+.wishes li b{font:italic 400 26px/1 var(--f-display);color:var(--gold-deep)}
+.wishes .none{grid-column:1/-1;text-align:center;color:var(--ink-soft);font-style:italic}
+.budget{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 20px;border-radius:999px;background:linear-gradient(180deg,var(--lapis-2),var(--lapis));color:var(--gold-hi);font:650 16px/1 var(--f-ui);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
+.budget span{font:600 12px/1 var(--f-ui);letter-spacing:.18em;text-transform:uppercase;color:#c9d3ff}
+.gift{position:absolute;left:50%;top:30px;width:250px;margin-left:-125px;filter:drop-shadow(0 0 30px rgba(234,198,126,.35)) drop-shadow(0 20px 30px rgba(0,0,0,.4));z-index:5;pointer-events:none}
+.card-wrap{position:relative}
+
+/* demo-mode badge (live build) */
+.badge{position:relative;display:block;width:max-content;margin:0 auto;z-index:2;font:600 11px/1 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--muted)}
+
+/* =========================================================================
+   GLOBE SVG STATE CLASSES
+   ========================================================================= */
+#frost{opacity:0;transition:opacity 1.6s var(--ease-out)}
+.is-frosted #frost{opacity:1}
+.is-frosted #interior{filter:url(#interiorBlur)}
+.lamp{transition:fill .6s, filter .6s}
+.lamp.on{fill:var(--gold-hi);filter:url(#glow)}
+.flake{animation:fall var(--dur) linear var(--delay) infinite}
+.flake.warm{animation-name:fallWarm}
+@keyframes fall{from{transform:translate(var(--x),-150px)}to{transform:translate(calc(var(--x) + var(--sway)),140px)}}
+@keyframes fallWarm{0%{transform:translate(var(--x),-150px);fill:#fff}45%{fill:#ffe1a3;opacity:1}75%{opacity:0;fill:#ffc061}100%{transform:translate(calc(var(--x) + var(--sway)),140px);opacity:0}}
+.swirl .flake{animation:swirl var(--sdur) linear var(--delay) infinite;fill:#fff}
+@keyframes swirl{from{transform:rotate(var(--a)) translateX(var(--rad)) }to{transform:rotate(calc(var(--a) + 360deg)) translateX(var(--rad))}}
+.earth-bob{animation:bob 6s var(--ease-in-out) infinite alternate}
+@keyframes bob{to{transform:translateY(-4px)}}
+.sun-rays{transform-origin:240px 62px;animation:rays 40s linear infinite}
+@keyframes rays{to{transform:rotate(360deg)}}
+#mist{opacity:0;transition:opacity .5s var(--ease-out)}
+.swirling #mist{opacity:1}
+.mist-spin{animation:mistSpin 1.3s linear infinite}
+@keyframes mistSpin{to{transform:rotate(360deg)}}
+.pt-label{font:600 9px/1 var(--f-ui);letter-spacing:.06em;fill:#fff;paint-order:stroke;stroke:rgba(6,10,28,.85);stroke-width:2.6px;opacity:0;transition:opacity .6s}
+.show-labels .pt-label{opacity:1}
+#arcPath{stroke-dasharray:1;stroke-dashoffset:1}
+
+/* drifting letters */
+.drift-w{display:inline-block;white-space:nowrap}
+.drift-ch{display:inline-block;white-space:pre;will-change:opacity,filter,transform}
+
+/* =========================================================================
+   DESKTOP ≥ 900px — globe left, panel right
+   ========================================================================= */
+@media (min-width:900px){
+  .stage{max-width:1080px;display:grid;grid-template-columns:1.05fr .95fr;column-gap:var(--s8);align-items:center;padding-top:var(--s8)}
+  .globe-wrap,.stage[data-scene] .globe-wrap{width:min(42vw,460px);margin:0;justify-self:center;grid-row:1}
+  .panel{grid-column:2;grid-row:1;text-align:start}
+  .names{max-width:420px}
+  .lede{margin-inline:0}
+  .p-waiting,.p-shake{text-align:center}
+}
+
+/* =========================================================================
+   REDUCED MOTION
+   ========================================================================= */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+  .sky .aurora,.far-snow,.stars i{animation:none!important}
+  .flake{animation:none!important;opacity:.8}
+}
+
+/* =========================================================================
+   PRODUCTION ADDITIONS
+   ========================================================================= */
+.badge[hidden]{display:none}
+.foot{position:relative;z-index:1;padding:0 0 calc(var(--s5) + env(safe-area-inset-bottom))}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+[tabindex="-1"]:focus{outline:none}
+.stage.back .panel{animation-name:panelBack!important}
+@keyframes panelBack{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+
+/* loading */
+.stage[data-scene="loading"] .globe-wrap{width:min(68vw,300px)}
+.p-loading .lede{animation:breathe-o 2.4s ease-in-out infinite}
+@keyframes breathe-o{50%{opacity:.55}}
+
+/* welcome entrance */
+.stage[data-scene="welcome"] .headline{animation:panelIn .9s var(--ease-out) .2s both}
+.stage[data-scene="welcome"] .name-btn{animation:nameIn .5s var(--ease-out) both;animation-delay:calc(var(--i) * 60ms + 250ms)}
+@keyframes nameIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.globe-wrap.enter{animation:globeIn .9s var(--ease-out) both}
+@keyframes globeIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.names.picking .name-btn{animation:none;transition:opacity .25s,transform .2s var(--ease-out)}
+.names.picking .name-btn:not([aria-pressed="true"]){opacity:.4}
+.names.picking .name-btn[aria-pressed="true"]{animation:pickPop .35s var(--ease-spring)}
+@keyframes pickPop{50%{transform:scale(.97)}}
+
+/* letter */
+.field.invalid input{border-bottom-color:var(--pom)}
+.field{margin-bottom:30px}
+.field .err{display:none;position:absolute;top:100%;inset-inline-start:0;font:500 13px/1.3 var(--f-ui);color:var(--pom);margin-top:3px}
+.field.invalid .err{display:block}
+.field input{font-family:"Caveat","Vazirmatn","Segoe Print",cursive;padding-right:0;padding-left:0;padding-inline-end:52px}
+.letter .btn[disabled]{opacity:.75;cursor:progress}
+.signoff .who{font:inherit}
+
+/* waiting */
+.counter span{display:inline-block}
+.p-waiting .deadline{direction:inherit}
+
+/* shake: idle invitation + drag */
+.stage[data-scene="shake"] .globe-wrap{cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent}
+.stage[data-scene="shake"] .globe-wrap:not(.shaking):not(.dragging){animation:globeBreathe 4s var(--ease-in-out) infinite}
+@keyframes globeBreathe{0%,100%{transform:rotate(0)}25%{transform:rotate(1.5deg)}75%{transform:rotate(-1.5deg)}}
+.globe-wrap:focus-visible{outline:3px solid var(--gold-hi);outline-offset:6px;border-radius:24px}
+.lamp{transform-box:fill-box;transform-origin:center}
+
+/* reveal */
+.gift{opacity:0}
+.wishes li span{font-family:"Figtree","Vazirmatn",system-ui,sans-serif;overflow-wrap:anywhere}
+.wishes li[dir=rtl] span{text-align:right}
+.wishes li[dir=rtl] b{text-align:right}
+.wishes li[dir=ltr] span{text-align:left}
+.budget bdi{font:inherit}
+.p-reveal .foot-links.links{margin-top:var(--s1)}
+
+/* toast for network trouble */
+.toast{position:fixed;left:0;right:0;margin:0 auto;bottom:calc(16px + env(safe-area-inset-bottom));z-index:40;width:min(92vw,420px);
+  display:flex;align-items:center;gap:12px;padding:12px 12px 12px 16px;border-radius:16px;background:rgba(12,20,54,.94);border:1px solid rgba(234,198,126,.45);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);color:var(--cream);font:500 15px/1.35 var(--f-ui);animation:panelIn .4s var(--ease-out) both}
+.toast[hidden]{display:none}
+.toast p{margin:0;flex:1}
+.toast .btn{min-height:44px;padding:0 16px;font-size:15px;flex:none}
+
+/* Persian: Vazirmatn everywhere it is the element's language; never letter-space Arabic script */
+:lang(fa){font-family:var(--f-fa)!important;letter-spacing:0!important}
+.lede:lang(fa),.hint:lang(fa){line-height:1.9}
+.eyebrow:lang(fa){font-size:14px;font-weight:600}
+.dear:lang(fa){font-size:28px;font-weight:600}
+.signoff:lang(fa){font-size:22px}
+.field label:lang(fa){font-size:13px}
+.h2:lang(fa){font-weight:500;font-size:25px;line-height:1.5}
+.counter small:lang(fa){font-size:20px}
+.wishes li span[lang=""]{font-family:"Figtree","Vazirmatn",system-ui,sans-serif!important}
+
+@media (min-width:900px){
+  .stage{align-content:center}
+  .foot{padding-top:var(--s4)}
+  .stage[data-scene="loading"] .globe-wrap{width:min(42vw,460px)}
+  .p-loading{text-align:start}
+}
+@media (prefers-reduced-motion:reduce){
+  .stage[data-scene="shake"] .globe-wrap{animation:none!important}
+  .p-loading .lede{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= BACKDROP ======================= -->
+<div class="sky" aria-hidden="true">
+  <div class="aurora"></div>
+  <div class="stars" id="stars"></div>
+  <div class="far-snow l2"></div>
+  <div class="far-snow"></div>
+</div>
+
+<main class="stage" id="stage" data-scene="loading">
+
+  <!-- ======================= THE SNOW GLOBE (persists across scenes) ======================= -->
+  <div class="globe-wrap" id="globeWrap">
+  <svg id="globe" viewBox="0 0 320 380" role="img" aria-label="A snow globe holding a tiny Earth, with lights over Tehran, Germany and Sydney">
+    <defs>
+      <!-- glass interior clip -->
+      <clipPath id="glassClip"><circle cx="160" cy="150" r="134"/></clipPath>
+      <clipPath id="earthClip"><circle cx="0" cy="0" r="62"/></clipPath>
+      <clipPath id="baseClip"><path d="M84 272 C84 262 236 262 236 272 L274 344 C274 362 46 362 46 344 Z"/></clipPath>
+
+      <linearGradient id="gInteriorSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1b2f74"/><stop offset=".6" stop-color="#132355"/><stop offset="1" stop-color="#0d1840"/>
+      </linearGradient>
+      <radialGradient id="gSunGlow" cx="240" cy="62" r="150" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#ffd08a" stop-opacity=".85"/><stop offset=".25" stop-color="#ff9e5e" stop-opacity=".38"/><stop offset=".6" stop-color="#ff8a5b" stop-opacity=".08"/><stop offset="1" stop-color="#ff8a5b" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="gColdGlow" cx="70" cy="230" r="130" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#9cc4ff" stop-opacity=".35"/><stop offset="1" stop-color="#9cc4ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="gSun" cx=".4" cy=".35" r=".7">
+        <stop offset="0" stop-color="#fff6d8"/><stop offset=".55" stop-color="#ffd27a"/><stop offset="1" stop-color="#ffa64d"/>
+      </radialGradient>
+      <linearGradient id="gGround" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#f6f9ff"/><stop offset=".42" stop-color="#e3ecfb"/><stop offset=".56" stop-color="#f3dfb8"/><stop offset="1" stop-color="#e9bd7f"/>
+      </linearGradient>
+      <linearGradient id="gGroundShade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0b1640" stop-opacity=".55"/>
+      </linearGradient>
+      <!-- Earth -->
+      <radialGradient id="gOcean" cx=".62" cy=".32" r=".85">
+        <stop offset="0" stop-color="#3f8fc0"/><stop offset=".45" stop-color="#1f5d93"/><stop offset="1" stop-color="#0d2c5c"/>
+      </radialGradient>
+      <radialGradient id="gEarthLight" cx=".72" cy=".25" r=".9">
+        <stop offset="0" stop-color="#fff1c9" stop-opacity=".55"/><stop offset=".35" stop-color="#ffcf8a" stop-opacity=".12"/><stop offset=".7" stop-color="#0a1438" stop-opacity=".15"/><stop offset="1" stop-color="#060c28" stop-opacity=".7"/>
+      </radialGradient>
+      <radialGradient id="gAtmo" cx=".5" cy=".5" r=".5">
+        <stop offset=".88" stop-color="#9fe4ff" stop-opacity=".0"/><stop offset=".9" stop-color="#9fe4ff" stop-opacity=".28"/><stop offset="1" stop-color="#9fe4ff" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="gLand" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e1b9"/><stop offset="1" stop-color="#c9d2a0"/>
+      </linearGradient>
+      <linearGradient id="gArc" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#52d6c8"/><stop offset=".45" stop-color="#ffffff"/><stop offset="1" stop-color="#ffb65e"/>
+      </linearGradient>
+      <!-- glass -->
+      <radialGradient id="gGlassEdge" cx=".5" cy=".5" r=".5">
+        <stop offset=".78" stop-color="#fff" stop-opacity="0"/><stop offset=".95" stop-color="#cfe2ff" stop-opacity=".16"/><stop offset="1" stop-color="#ffffff" stop-opacity=".45"/>
+      </radialGradient>
+      <linearGradient id="gHighlight" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>
+      <!-- base -->
+      <linearGradient id="gBase" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#0d1438"/><stop offset=".3" stop-color="#22357f"/><stop offset=".55" stop-color="#2d48a3"/><stop offset=".8" stop-color="#1a2862"/><stop offset="1" stop-color="#0b1130"/>
+      </linearGradient>
+      <linearGradient id="gBrass" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#7a5521"/><stop offset=".3" stop-color="#e9c47b"/><stop offset=".5" stop-color="#fff0c2"/><stop offset=".7" stop-color="#d6a95a"/><stop offset="1" stop-color="#6b4818"/>
+      </linearGradient>
+      <linearGradient id="gBandShade" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset=".35" stop-color="#000" stop-opacity="0"/><stop offset=".65" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/>
+      </linearGradient>
+      <radialGradient id="gShadow" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Persian khatam (8-point star) lattice -->
+      <pattern id="girih" width="20" height="20" x="10" y="293" patternUnits="userSpaceOnUse">
+        <g fill="none" stroke="#eac67e" stroke-width=".8" stroke-linejoin="round">
+          <rect x="5.2" y="5.2" width="9.6" height="9.6"/>
+          <rect x="5.2" y="5.2" width="9.6" height="9.6" transform="rotate(45 10 10)"/>
+          <path d="M0 0 L3 3 M20 0 L17 3 M0 20 L3 17 M20 20 L17 17" opacity=".7"/>
+        </g>
+        <circle cx="10" cy="10" r="1.1" fill="#52d6c8" opacity=".75"/>
+      </pattern>
+      <!-- filters -->
+      <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="interiorBlur"><feGaussianBlur stdDeviation="3.2"/></filter>
+      <filter id="frostNoise" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="3" seed="7" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -0.62" result="speck"/>
+        <feComposite in="speck" in2="SourceGraphic" operator="in"/>
+      </filter>
+      <radialGradient id="gFrost" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#eef6ff" stop-opacity=".42"/><stop offset=".6" stop-color="#e4f0ff" stop-opacity=".6"/><stop offset="1" stop-color="#ffffff" stop-opacity=".92"/>
+      </radialGradient>
+    </defs>
+
+    <!-- shadow -->
+    <ellipse cx="160" cy="362" rx="132" ry="12" fill="url(#gShadow)"/>
+
+    <!-- ===== GLASS INTERIOR (clipped) ===== -->
+    <g id="interior" clip-path="url(#glassClip)">
+      <rect x="20" y="10" width="280" height="290" fill="url(#gInteriorSky)"/>
+      <rect x="20" y="10" width="280" height="290" fill="url(#gColdGlow)"/>
+      <rect x="20" y="10" width="280" height="290" fill="url(#gSunGlow)"/>
+      <!-- tiny interior stars, cold side -->
+      <g fill="#fff" opacity=".7">
+        <circle cx="62" cy="80" r=".9"/><circle cx="88" cy="48" r=".7"/><circle cx="48" cy="130" r=".8"/><circle cx="110" cy="36" r=".6"/><circle cx="70" cy="172" r=".6"/>
+      </g>
+      <!-- Sydney summer sun -->
+      <g id="sun">
+        <g class="sun-rays" stroke="#ffd690" stroke-width="1.4" stroke-linecap="round" opacity=".7">
+          <path d="M240 36v-8M240 96v-8M214 62h-8M274 62h-8M222 44l-5-5M263 85l-5-5M258 44l5-5M217 85l5-5"/>
+        </g>
+        <circle cx="240" cy="62" r="15" fill="url(#gSun)" filter="url(#softGlow)"/>
+      </g>
+      <!-- sea sliver (Sydney side) -->
+      <path d="M150 248 C200 236 250 232 300 236 L300 262 L150 262 Z" fill="#2f9fb3"/>
+      <path d="M176 244 q6 -3 12 0 t12 0 M214 240 q6 -3 12 0 t12 0 M252 238 q6 -3 12 0 t12 0" fill="none" stroke="#e8fbff" stroke-width="1.1" stroke-linecap="round" opacity=".8"/>
+      <!-- ground: snow (left) → sand (right) -->
+      <path d="M14 258 C70 230 118 240 160 252 C200 262 246 244 306 250 L306 300 L14 300 Z" fill="url(#gGround)"/>
+      <path d="M14 258 C70 230 118 240 160 252 C200 262 246 244 306 250 L306 300 L14 300 Z" fill="url(#gGroundShade)"/>
+      <!-- little firs -->
+      <g transform="translate(58 236)">
+        <path d="M0 -26 L10 -8 L5 -8 L13 6 L-13 6 L-5 -8 L-10 -8 Z" fill="#1c4a46"/>
+        <path d="M0 -26 L5 -17 L2 -15 L-2 -16 L-5 -17 Z M-6 -8 L-3 -10 L3 -9 L6 -8 Z" fill="#f3f8ff"/>
+        <rect x="-1.6" y="6" width="3.2" height="5" fill="#5a3b25"/>
+      </g>
+      <g transform="translate(86 246) scale(.7)">
+        <path d="M0 -26 L10 -8 L5 -8 L13 6 L-13 6 L-5 -8 L-10 -8 Z" fill="#245a52"/>
+        <path d="M0 -26 L5 -17 L2 -15 L-2 -16 L-5 -17 Z" fill="#f3f8ff"/>
+        <rect x="-1.6" y="6" width="3.2" height="5" fill="#5a3b25"/>
+      </g>
+      <!-- little palm with a bauble garland (Australian Christmas) -->
+      <g transform="translate(250 250)">
+        <path d="M0 0 C-2 -12 1 -22 4 -32" fill="none" stroke="#8a5a32" stroke-width="2.6" stroke-linecap="round"/>
+        <g fill="#2f7a55">
+          <path d="M4 -32 C-6 -38 -14 -34 -18 -28 C-10 -32 -2 -31 4 -32Z"/>
+          <path d="M4 -32 C12 -40 22 -38 26 -31 C18 -34 10 -33 4 -32Z"/>
+          <path d="M4 -32 C0 -42 6 -48 12 -48 C8 -42 6 -37 4 -32Z"/>
+          <path d="M4 -32 C-2 -36 -10 -42 -10 -46 C-4 -42 0 -37 4 -32Z"/>
+          <path d="M4 -32 C14 -32 20 -26 22 -20 C16 -26 10 -29 4 -32Z"/>
+        </g>
+        <path d="M-2 -18 Q2 -14 6 -20" fill="none" stroke="#eac67e" stroke-width=".7"/>
+        <circle cx="-2" cy="-18" r="1.6" fill="#d8455b"/><circle cx="2" cy="-15.5" r="1.6" fill="#eac67e"/><circle cx="6" cy="-20" r="1.6" fill="#52d6c8"/>
+      </g>
+
+      <!-- TINY EARTH (orthographic; drawn by JS renderEarth) -->
+      <g class="earth-bob">
+        <g id="earth" transform="translate(160 128)">
+          <circle r="69" fill="url(#gAtmo)"/>
+          <circle r="62" fill="url(#gOcean)"/>
+          <g clip-path="url(#earthClip)">
+            <path id="grat" fill="none" stroke="#bfe3ff" stroke-opacity=".16" stroke-width=".6"/>
+            <path id="land" fill="url(#gLand)" stroke="#f6efcf" stroke-opacity=".35" stroke-width=".4"/>
+            <path id="arcPath" pathLength="1" fill="none" stroke="url(#gArc)" stroke-width="1.8" stroke-linecap="round" filter="url(#softGlow)"/>
+          </g>
+          <circle r="62" fill="url(#gEarthLight)"/>
+          <!-- three glowing points -->
+          <g id="pts">
+            <g class="pt" id="pt-teh"><circle r="5.5" fill="#52d6c8" opacity=".3"/><circle r="2.6" fill="#b8fff6" filter="url(#glow)"/><text class="pt-label" x="6" y="-6" text-anchor="start">Tehran</text></g>
+            <g class="pt" id="pt-ger"><circle r="5.5" fill="#e4f0ff" opacity=".3"/><circle r="2.6" fill="#ffffff" filter="url(#glow)"/><text class="pt-label" x="-7" y="-4" text-anchor="end">Germany</text></g>
+            <g class="pt" id="pt-syd"><circle r="5.5" fill="#ffb65e" opacity=".35"/><circle r="2.6" fill="#ffe2a8" filter="url(#glow)"/><text class="pt-label" x="0" y="13" text-anchor="middle">Sydney</text></g>
+          </g>
+          <circle id="spark" r="2.4" fill="#fff" filter="url(#glow)" opacity="0"/>
+        </g>
+      </g>
+
+      <!-- SNOW (generated by JS into this group; origin = glass centre) -->
+      <g id="snow" transform="translate(160 150)"></g>
+      <!-- SHAKE MIST: streams of snow that read as a swirl even in a still frame -->
+      <g id="mist" transform="translate(160 150)" aria-hidden="true">
+        <g class="mist-spin" fill="none" stroke="#fff" stroke-linecap="round">
+          <path d="M-112 10 A112 112 0 0 1 40 -104" stroke-width="14" opacity=".10" filter="url(#interiorBlur)"/>
+          <path d="M96 52 A100 100 0 0 1 -70 82" stroke-width="12" opacity=".09" filter="url(#interiorBlur)"/>
+          <path d="M-112 10 A112 112 0 0 1 40 -104" stroke-width="2.6" stroke-dasharray="0 9" opacity=".85"/>
+          <path d="M-84 -40 A92 92 0 0 1 86 -30" stroke-width="2" stroke-dasharray="0 12" opacity=".7"/>
+          <path d="M96 52 A100 100 0 0 1 -70 82" stroke-width="2.4" stroke-dasharray="0 10" opacity=".8"/>
+          <path d="M-60 60 A80 80 0 0 1 -78 -20" stroke-width="1.8" stroke-dasharray="0 8" opacity=".6"/>
+          <path d="M30 118 A120 120 0 0 1 -116 34" stroke-width="1.6" stroke-dasharray="0 11" opacity=".55"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- ===== FROST OVERLAY (waiting state) ===== -->
+    <g id="frost" clip-path="url(#glassClip)" aria-hidden="true">
+      <circle cx="160" cy="150" r="134" fill="url(#gFrost)"/>
+      <rect x="20" y="10" width="280" height="290" fill="#fff" filter="url(#frostNoise)" opacity=".5"/>
+      <g id="ferns" fill="none" stroke="#ffffff" stroke-linecap="round" opacity=".75"></g>
+      <!-- a clear "breath" patch over the Earth so it's still hinted -->
+    </g>
+
+    <!-- ===== GLASS ===== -->
+    <g id="glass" pointer-events="none">
+      <circle cx="160" cy="150" r="134" fill="url(#gGlassEdge)"/>
+      <circle cx="160" cy="150" r="134" fill="none" stroke="#e8f1ff" stroke-opacity=".55" stroke-width="1.4"/>
+      <path d="M62 86 C80 52 112 32 148 26" fill="none" stroke="url(#gHighlight)" stroke-width="7" stroke-linecap="round" opacity=".55"/>
+      <path d="M52 118 C53 108 56 100 59 94" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".45"/>
+      <ellipse cx="236" cy="226" rx="22" ry="7" transform="rotate(-48 236 226)" fill="#fff" opacity=".08"/>
+    </g>
+
+    <!-- ===== BASE ===== -->
+    <g id="base">
+      <path d="M84 272 C84 262 236 262 236 272 L274 344 C274 362 46 362 46 344 Z" fill="url(#gBase)"/>
+      <!-- girih band -->
+      <g clip-path="url(#baseClip)">
+        <rect x="40" y="293" width="240" height="20" fill="#0a1236" opacity=".55"/>
+        <rect x="40" y="293" width="240" height="20" fill="url(#girih)" opacity=".9"/>
+        <rect x="40" y="293" width="240" height="20" fill="url(#gBandShade)"/>
+        <rect x="40" y="291.5" width="240" height="1.6" fill="url(#gBrass)"/>
+        <rect x="40" y="313" width="240" height="1.6" fill="url(#gBrass)"/>
+        <rect x="148" y="262" width="26" height="100" fill="#fff" opacity=".07"/>
+        <rect x="40" y="262" width="240" height="100" fill="url(#gBandShade)" opacity=".5"/>
+      </g>
+      <!-- seven letter-lamps -->
+      <g id="lamps" fill="#3a4680" stroke="#eac67e" stroke-width=".6">
+        <circle class="lamp" cx="106" cy="331" r="3.8"/><circle class="lamp" cx="124" cy="331" r="3.8"/><circle class="lamp" cx="142" cy="331" r="3.8"/>
+        <circle class="lamp" cx="160" cy="331" r="3.8"/><circle class="lamp" cx="178" cy="331" r="3.8"/><circle class="lamp" cx="196" cy="331" r="3.8"/><circle class="lamp" cx="214" cy="331" r="3.8"/>
+      </g>
+      <!-- brass collar + foot rim -->
+      <ellipse cx="160" cy="270" rx="77" ry="9" fill="url(#gBrass)"/>
+      <ellipse cx="160" cy="268.5" rx="70" ry="6" fill="#6b4818" opacity=".55"/>
+      <path d="M46 344 C46 362 274 362 274 344 L274 348 C274 366 46 366 46 348 Z" fill="url(#gBrass)"/>
+    </g>
+  </svg>
+  </div>
+
+  <!-- ======================= LOADING ======================= -->
+  <section class="panel p-loading" aria-busy="true">
+    <div class="eyebrow" lang="en" dir="ltr">Secret Santa · 2026</div>
+    <p class="lede" data-t="loading" tabindex="-1">Checking the North Pole post…</p>
+  </section>
+
+  <!-- ======================= SCENE 1 — WELCOME ======================= -->
+  <section class="panel p-welcome" aria-labelledby="hello" lang="en" dir="ltr">
+    <div class="eyebrow">Secret Santa · Christmas 2026</div>
+    <h1 class="headline" id="hello" data-drift="greeting" aria-live="off" tabindex="-1">Merry Christmas</h1>
+    <p class="lede">Seven names, one snow globe. Choose yours to begin.</p>
+    <div class="names" id="names" role="group" aria-label="Who are you?"></div>
+  </section>
+
+  <!-- ======================= SCENE 2 — LETTER ======================= -->
+  <section class="panel p-letter" aria-labelledby="dear">
+    <form class="letter" id="letter" novalidate>
+      <svg class="stamp" viewBox="0 0 56 66" aria-hidden="true">
+        <defs><mask id="perf"><rect width="56" height="66" fill="#fff"/><g fill="#000">
+          <circle cx="0" cy="6" r="2.4"/><circle cx="0" cy="16" r="2.4"/><circle cx="0" cy="26" r="2.4"/><circle cx="0" cy="36" r="2.4"/><circle cx="0" cy="46" r="2.4"/><circle cx="0" cy="56" r="2.4"/>
+          <circle cx="56" cy="6" r="2.4"/><circle cx="56" cy="16" r="2.4"/><circle cx="56" cy="26" r="2.4"/><circle cx="56" cy="36" r="2.4"/><circle cx="56" cy="46" r="2.4"/><circle cx="56" cy="56" r="2.4"/>
+          <circle cx="8" cy="0" r="2.4"/><circle cx="18" cy="0" r="2.4"/><circle cx="28" cy="0" r="2.4"/><circle cx="38" cy="0" r="2.4"/><circle cx="48" cy="0" r="2.4"/>
+          <circle cx="8" cy="66" r="2.4"/><circle cx="18" cy="66" r="2.4"/><circle cx="28" cy="66" r="2.4"/><circle cx="38" cy="66" r="2.4"/><circle cx="48" cy="66" r="2.4"/></g></mask></defs>
+        <g mask="url(#perf)"><rect width="56" height="66" fill="#fffaf0"/><rect x="5" y="5" width="46" height="56" fill="#1e2f78"/>
+          <circle cx="28" cy="28" r="13" fill="#1f5d93"/><path d="M20 22c4-3 9-2 10 2s-3 5-1 8 6 1 6 5M31 17c3 1 5 4 5 6" fill="none" stroke="#e9e1b9" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="28" cy="28" r="13" fill="none" stroke="#eac67e" stroke-width="1"/>
+          <text x="28" y="53" text-anchor="middle" font-family="Figtree,sans-serif" font-size="5.4" font-weight="700" letter-spacing=".5" fill="#eac67e">NORTH POLE</text></g>
+      </svg>
+      <h2 class="dear" id="dear" data-t="dear" tabindex="-1">Dear North Pole,</h2>
+      <p class="lede" data-drift="letterLede" aria-live="off">Write two wishes for your Secret Santa — little things you would truly love.</p>
+      <div class="field"><label for="w1" data-t="wish1">Wish one</label><input id="w1" name="wish1" maxlength="80" data-tp="ph1" placeholder="Something cosy…" autocomplete="off" lang="" required aria-describedby="w1err"><span class="count" aria-hidden="true">0/80</span><div class="err" id="w1err" data-t="needWish">One more wish, please</div></div>
+      <div class="field"><label for="w2" data-t="wish2">Wish two</label><input id="w2" name="wish2" maxlength="80" data-tp="ph2" placeholder="Something fun…" autocomplete="off" lang="" required aria-describedby="w2err"><span class="count" aria-hidden="true">0/80</span><div class="err" id="w2err" data-t="needWish">One more wish, please</div></div>
+      <div class="signoff"><span data-t="signoff">Love,</span> <bdi class="who" lang="en"></bdi></div>
+      <button class="btn btn-primary block" id="sendBtn" type="submit">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#7e1529" stroke="#fbe3a8" stroke-width="1"/><path d="M12 6l1.6 3.4 3.7-.9-.9 3.7L20 12l-3.6 1.8.9 3.7-3.7-.9L12 20l-1.6-3.4-3.7.9.9-3.7L4 12l3.6-1.8-.9-3.7 3.7.9z" fill="#eac67e" transform="translate(12 12) scale(.55) translate(-12 -12)"/></svg>
+        <span id="sendLabel" data-t="send">Seal &amp; send</span>
+      </button>
+    </form>
+    <div class="foot-links"><button class="link" type="button" data-act="notyou" data-t="notYou">Not you?</button></div>
+  </section>
+
+  <!-- ======================= SCENE 3 — WAITING ======================= -->
+  <section class="panel p-waiting">
+    <div class="eyebrow" data-drift="waitEyebrow" aria-live="off" tabindex="-1" id="waitTop">Your letter is on its way</div>
+    <p class="counter" id="counter" role="status"><span id="count">0</span> <small id="ofTotal">of 7</small></p>
+    <p class="lede" data-drift="waitLede" aria-live="off">letters have reached the North Pole. The globe will clear when everyone's has arrived.</p>
+    <div class="deadline"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#eac67e" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span id="deadlineText">Letters by 7 December 2026</span></div>
+    <div class="foot-links"><button class="link" type="button" data-act="edit" data-t="edit">Edit my letter</button><button class="link" type="button" data-act="notyou" data-t="notYou">Not you?</button></div>
+  </section>
+
+  <!-- ======================= SCENE 4 — SHAKE ======================= -->
+  <section class="panel p-shake">
+    <div class="eyebrow" id="shakeEyebrow" data-drift="shakeAll" aria-live="off">Every letter has arrived</div>
+    <h2 class="h2" data-drift="shakeTitle" aria-live="off" tabindex="-1" id="shakeTitle">Shake the snow globe</h2>
+    <p class="hint" data-drift="shakeHint" aria-live="off">Tap it, drag it, or give your phone a little shake.</p>
+    <div style="margin-top:20px"><button class="btn btn-gold" type="button" data-act="shake">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/></svg>
+      <span data-t="shakeBtn">Shake</span></button></div>
+  </section>
+
+  <!-- ======================= SCENE 5 — REVEAL ======================= -->
+  <section class="panel p-reveal">
+    <div class="card-wrap">
+      <article class="card" id="card" aria-labelledby="rcpt">
+        <svg class="corner tl" viewBox="0 0 24 24" aria-hidden="true"><use href="#star8"/></svg><svg class="corner tr" viewBox="0 0 24 24" aria-hidden="true"><use href="#star8"/></svg>
+        <svg class="corner bl" viewBox="0 0 24 24" aria-hidden="true"><use href="#star8"/></svg><svg class="corner br" viewBox="0 0 24 24" aria-hidden="true"><use href="#star8"/></svg>
+        <div class="eyebrow" data-drift="buyingFor" aria-live="off">You're buying for</div>
+        <h2 class="recipient" id="rcpt" lang="en" dir="ltr" tabindex="-1"></h2>
+        <div class="ornament" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24"><use href="#star8"/></svg></div>
+        <ol class="wishes" id="wishes"></ol>
+        <div class="budget"><span data-t="budget">Budget</span><bdi id="budget" lang="en" dir="ltr"></bdi></div>
+      </article>
+      <!-- GIFT (overlays the card, unties on reveal) -->
+      <svg class="gift" id="gift" viewBox="0 0 230 220" aria-hidden="true">
+        <defs>
+          <linearGradient id="gBox" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7e1529"/><stop offset=".45" stop-color="#c2304a"/><stop offset="1" stop-color="#6e1022"/></linearGradient>
+          <linearGradient id="gLid" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8c1a30"/><stop offset=".45" stop-color="#d8455b"/><stop offset="1" stop-color="#7a1428"/></linearGradient>
+          <linearGradient id="gRib" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b48638"/><stop offset=".5" stop-color="#fbe3a8"/><stop offset="1" stop-color="#b48638"/></linearGradient>
+          <pattern id="giftDots" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M8 3l1.2 3.8L13 8l-3.8 1.2L8 13l-1.2-3.8L3 8l3.8-1.2z" fill="#eac67e" opacity=".35"/></pattern>
+        </defs>
+        <g id="gBody">
+          <rect x="30" y="98" width="170" height="112" rx="6" fill="url(#gBox)"/>
+          <rect x="30" y="98" width="170" height="112" rx="6" fill="url(#giftDots)"/>
+          <rect x="30" y="98" width="170" height="14" fill="#000" opacity=".18"/>
+        </g>
+        <rect id="ribV" x="104" y="98" width="22" height="112" fill="url(#gRib)"/>
+        <g id="gLidG">
+          <rect x="22" y="74" width="186" height="30" rx="5" fill="url(#gLid)"/>
+          <rect x="22" y="74" width="186" height="30" rx="5" fill="url(#giftDots)"/>
+          <rect x="104" y="74" width="22" height="30" fill="url(#gRib)"/>
+        </g>
+        <g id="bow" transform="translate(115 74)">
+          <path id="loopL" d="M0 0 C-18 -30 -62 -36 -58 -10 C-56 6 -24 6 0 0Z" fill="url(#gRib)" stroke="#9a6f2a" stroke-width=".8"/>
+          <path id="loopR" d="M0 0 C18 -30 62 -36 58 -10 C56 6 24 6 0 0Z" fill="url(#gRib)" stroke="#9a6f2a" stroke-width=".8"/>
+          <path id="tailL" d="M-4 2 C-14 18 -26 28 -36 34 L-28 38 C-18 30 -8 20 -2 4Z" fill="#d6a95a"/>
+          <path id="tailR" d="M4 2 C14 18 26 28 36 34 L28 38 C18 30 8 20 2 4Z" fill="#d6a95a"/>
+          <ellipse rx="10" ry="8" fill="#fbe3a8" stroke="#9a6f2a" stroke-width=".8"/>
+        </g>
+      </svg>
+    </div>
+    <div class="foot-links" style="margin-top:18px"><button class="btn btn-ghost" type="button" data-act="replay">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg><span data-t="shakeAgain">Shake again</span></button></div>
+    <div class="foot-links links"><button class="link" type="button" data-act="edit" data-t="edit">Edit my letter</button><button class="link" type="button" data-act="notyou" data-t="notYou">Not you?</button></div>
+  </section>
+</main>
+
+<footer class="foot" lang="en" dir="ltr"><div class="badge" id="demoBadge" hidden title="No Google Sheet connected yet: letters are saved on this device only">Demo mode</div></footer>
+
+<div class="toast" id="toast" role="alert" hidden><p id="toastMsg"></p><button class="btn btn-gold" type="button" id="toastRetry">Try again</button></div>
+
+<!-- shared symbols -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="star8" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5l2.4 4.8 5.2-1.5-1.5 5.2 4.8 2.4-4.8 2.4 1.5 5.2-5.2-1.5L12 22.5l-2.4-4.8-5.2 1.5 1.5-5.2L1.1 12l4.8-2.4-1.5-5.2 5.2 1.5z"/><circle cx="12" cy="12" r="3" fill="#fbf6ea"/></symbol>
+</svg>
+
+<!-- ENVELOPE (flies into the globe) -->
+<svg class="envelope" id="envelope" viewBox="0 0 220 140" aria-hidden="true">
+  <defs>
+    <linearGradient id="gEnv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#efe3c8"/></linearGradient>
+    <radialGradient id="gWax" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#e2566b"/><stop offset=".6" stop-color="#b3263e"/><stop offset="1" stop-color="#6e1022"/></radialGradient>
+  </defs>
+  <rect x="4" y="8" width="212" height="128" rx="8" fill="url(#gEnv)" stroke="#d8c7a0"/>
+  <path d="M4 136 L110 70 L216 136" fill="#f3e8cf" stroke="#d8c7a0"/>
+  <path id="envFlap" d="M4 12 L110 84 L216 12 Z" fill="#f7eed9" stroke="#d8c7a0"/>
+  <path d="M10 12 H210" stroke="#b3263e" stroke-width="3" stroke-dasharray="10 8" opacity=".55"/>
+  <g transform="translate(110 82)"><g id="envSeal">
+    <path d="M0 -22 C10 -23 20 -14 21 -3 C23 9 14 21 1 21 C-12 22 -22 12 -21 -1 C-21 -12 -11 -21 0 -22Z" fill="url(#gWax)"/>
+    <circle r="14" fill="none" stroke="#7e1529" stroke-width="1.2" opacity=".7"/>
+    <g fill="#eac67e"><path d="M0 -10l2.2 5.3 5.6-1.5-1.5 5.6L11.6 0l-5.3 2.2 1.5 5.6-5.6-1.5L0 11.6l-2.2-5.3-5.6 1.5 1.5-5.6L-11.6 0l5.3-2.2-1.5-5.6 5.6 1.5z"/></g>
+  </g></g>
+</svg>
+
+<script>
+'use strict';
+/* =========================================================================
+   CONFIG — the only things you should need to change
+   ========================================================================= */
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyboZi5U98URy8UaXTJYYYyjOKyLI-TBds49jHFZE3qpdqnnIp1eBQmT54RtEjaMt5Nxg/exec';
+const BUDGET    = '$200 AUD';
+const DEADLINE  = '2026-12-07T23:59:59+11:00'; // last moment for letters: 7 Dec 2026, 23:59 Sydney time (AEDT = UTC+11)
+const POLL_MS   = 20000;                       // how often the waiting screen checks for new letters
+
+/* Display names (exact) and language sequences. First language = home language
+   (buttons/labels); the story text drifts through the rest after ~8 s idle. */
+/*PEOPLE:BEGIN*/
+const PEOPLE = [
+  { name: 'Nicholas', langs: ['en', 'fr'] },
+  { name: 'Naghmeh',  langs: ['fa', 'en'] },
+  { name: 'Jeni',     langs: ['en', 'fr'] },
+  { name: 'Ian',      langs: ['en', 'fr'] },
+  { name: 'Neda',     langs: ['fa', 'de', 'en'] },
+  { name: 'Khesha',   langs: ['fa', 'de', 'en'] },
+  { name: 'Nick',     langs: ['fa', 'de', 'en'] },
+];
+/*PEOPLE:END*/
+
+/* The draw. Written by draw.mjs — obfuscated on purpose. Do not edit by hand. */
+/*DRAW:BEGIN*/const DRAW = "GDaq5ARQkAwYv1w4TcxVExaS0fQrl/i9KE2Iqm0z+GN03i8ad+4benX589gJ2ZnaQFvPjCZqskdw2i9QLO55MVz3v50JrdrzQVXCi2gx4y40nRVZI+5vMVjztpxG8pCfBBTkgWAxsjY69j1Wb+B3WH73opxKtcKfYlPEjSZ8skJx3Dcad+4bdnLz84k=";/*DRAW:END*/
+
+/* =========================================================================
+   WORDS  (machine translations — Naghmeh is reviewing the Farsi)
+   ========================================================================= */
+const NB = ' ';
+const TEXT = {
+  greeting:    { en:'Merry Christmas', de:'Frohe Weihnachten', fa:'کریسمس مبارک', fr:'Joyeux Noël' },
+  loading:     { en:'Checking the North Pole post…', de:'Wir schauen in der Nordpol-Post nach…', fa:'در حال بررسی پست قطب شمال…', fr:'On regarde la poste du pôle Nord…' },
+  dear:        { en:'Dear North Pole,', de:'Lieber Nordpol,', fa:'قطب شمال عزیز،', fr:'Cher pôle Nord,' },
+  letterLede:  { en:'Write two wishes for your Secret Santa — little things you would truly love.',
+                 de:'Schreib zwei Wünsche für deinen Wichtel – kleine Dinge, über die du dich wirklich freuen würdest.',
+                 fa:'دو آرزو برای بابانوئل مخفی‌ات بنویس — چیزهای کوچکی که واقعاً دوستشان داری.',
+                 fr:'Écris deux souhaits pour ton Père Noël secret — de petites choses qui te feraient vraiment plaisir.' },
+  wish1:       { en:'Wish one', de:'Wunsch eins', fa:'آرزوی اول', fr:'Premier souhait' },
+  wish2:       { en:'Wish two', de:'Wunsch zwei', fa:'آرزوی دوم', fr:'Deuxième souhait' },
+  ph1:         { en:'Something cosy…', de:'Etwas Gemütliches…', fa:'چیزی دنج و گرم…', fr:'Quelque chose de douillet…' },
+  ph2:         { en:'Something fun…', de:'Etwas Lustiges…', fa:'چیزی بامزه…', fr:'Quelque chose d’amusant…' },
+  needWish:    { en:'One more wish, please', de:'Bitte noch einen Wunsch', fa:'لطفاً یک آرزوی دیگر هم بنویس', fr:'Encore un souhait, s’il te plaît' },
+  signoff:     { en:'Love,', de:'Alles Liebe,', fa:'با عشق،', fr:'Bisous,' },
+  send:        { en:'Seal & send', de:'Versiegeln & senden', fa:'مهر و ارسال', fr:'Sceller et envoyer' },
+  sending:     { en:'Sending…', de:'Wird gesendet…', fa:'در حال ارسال…', fr:'Envoi…' },
+  notYou:      { en:'Not you?', de:'Nicht du?', fa:'تو نیستی؟', fr:'Ce n’est pas toi'+NB+'?' },
+  edit:        { en:'Edit my letter', de:'Brief ändern', fa:'ویرایش نامه‌ام', fr:'Modifier ma lettre' },
+  waitEyebrow: { en:'Your letter is on its way', de:'Dein Brief ist unterwegs', fa:'نامه‌ات در راه است', fr:'Ta lettre est en route' },
+  of:          { en:'of {total}', de:'von {total}', fa:'از {total}', fr:'sur {total}' },
+  lettersAria: { en:'{n} of {total} letters', de:'{n} von {total} Briefen', fa:'{n} از {total} نامه', fr:'{n} lettres sur {total}' },
+  waitLede:    { en:'letters have reached the North Pole. The globe will clear when everyone’s has arrived.',
+                 de:'Briefe sind am Nordpol angekommen. Die Kugel wird klar, sobald alle da sind.',
+                 fa:'نامه به قطب شمال رسیده است. وقتی نامهٔ همه برسد، گوی شفاف می‌شود.',
+                 fr:'lettres sont arrivées au pôle Nord. La boule s’éclaircira quand toutes seront là.' },
+  deadline:    { en:'Letters by {date}', de:'Briefe bis {date}', fa:'مهلت نامه‌ها: {date}', fr:'Lettres jusqu’au {date}' },
+  shakeAll:    { en:'Every letter has arrived', de:'Alle Briefe sind angekommen', fa:'همهٔ نامه‌ها رسیده‌اند', fr:'Toutes les lettres sont arrivées' },
+  shakeLate:   { en:'The deadline has passed', de:'Die Frist ist vorbei', fa:'مهلت نامه‌ها تمام شد', fr:'La date limite est passée' },
+  shakeTitle:  { en:'Shake the snow globe', de:'Schüttle die Schneekugel', fa:'گوی برفی را تکان بده', fr:'Secoue la boule à neige' },
+  shakeHint:   { en:'Tap it, drag it, or give your phone a little shake.', de:'Tippe sie an, zieh an ihr oder schüttle dein Handy ein bisschen.',
+                 fa:'رویش ضربه بزن، بکشش، یا گوشی‌ات را کمی تکان بده.', fr:'Touche-la, fais-la glisser ou secoue un peu ton téléphone.' },
+  shakeBtn:    { en:'Shake', de:'Schütteln', fa:'تکان بده', fr:'Secouer' },
+  buyingFor:   { en:'You’re buying for', de:'Du beschenkst', fa:'هدیهٔ تو برای', fr:'Tu offres un cadeau à' },
+  noLetter:    { en:'No letter arrived — surprise them!', de:'Kein Brief angekommen – mach eine Überraschung!', fa:'نامه‌ای نرسید — غافلگیرش کن!', fr:'Aucune lettre n’est arrivée — fais une surprise'+NB+'!' },
+  drawMissing: { en:'The elves haven’t made the draw yet.', de:'Die Wichtel haben noch nicht ausgelost.', fa:'قرعه‌کشی هنوز انجام نشده است.', fr:'Les lutins n’ont pas encore fait le tirage.' },
+  budget:      { en:'Budget', de:'Budget', fa:'بودجه', fr:'Budget' },
+  shakeAgain:  { en:'Shake again', de:'Nochmal schütteln', fa:'دوباره تکان بده', fr:'Secouer encore' },
+  netErr:      { en:'The North Pole post is a bit slow right now. Please try again.', de:'Die Nordpol-Post ist gerade langsam. Bitte versuch es noch einmal.',
+                 fa:'پست قطب شمال کمی کند است. لطفاً دوباره امتحان کن.', fr:'La poste du pôle Nord est un peu lente. Réessaie, s’il te plaît.' },
+  retry:       { en:'Try again', de:'Nochmal', fa:'دوباره', fr:'Réessayer' },
+};
+const GREET_SEQ = ['en', 'de', 'fa', 'fr'];
+const LOCALE = { en:'en-AU', de:'de-DE', fa:'fa-IR-u-ca-gregory', fr:'fr-FR' };
+
+/* =========================================================================
+   SMALL HELPERS
+   ========================================================================= */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const stage = $('#stage'), globeWrap = $('#globeWrap'), svg = $('#globe');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const TOTAL = PEOPLE.length;
+const personOf = n => PEOPLE.find(p => p.name === n) || null;
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch {} },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+const K_ME = 'ss26:me', K_REVEALED = 'ss26:revealed', K_DEMO = 'ss26:demoLetters';
+const dirOf = l => l === 'fa' ? 'rtl' : 'ltr';
+const nf = l => new Intl.NumberFormat(LOCALE[l] || 'en');
+function t(key, lang, vars){
+  const e = TEXT[key]; let s = e ? (e[lang] ?? e.en) : '';
+  if (vars) for (const k in vars) s = s.split('{' + k + '}').join(vars[k]);
+  return s;
+}
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+const DEMO = !SHEET_URL;
+let me = personOf(store.get(K_ME)) ? store.get(K_ME) : null;
+let letters = {};            // name -> { wish1, wish2 }
+let lettersLoaded = false;
+let scene = 'loading';
+const deadlineMs = Date.parse(DEADLINE);
+const pastDeadline = () => Date.now() > deadlineMs;
+const letterCount = () => PEOPLE.filter(p => letters[p.name]).length;
+const unlocked = () => letterCount() >= TOTAL || pastDeadline();
+const homeLang = () => me ? personOf(me).langs[0] : 'en';
+
+/* =========================================================================
+   BACKDROP STARS
+   ========================================================================= */
+(function stars(){
+  const box = $('#stars'); let h = '';
+  for (let i = 0; i < 90; i++){
+    const b = Math.random() < .12 ? ' class="b"' : '';
+    h += `<i${b} style="left:${(Math.random()*100).toFixed(2)}%;top:${(Math.pow(Math.random(),1.4)*85).toFixed(2)}%;--t:${(3+Math.random()*5).toFixed(1)}s;--d:${(-Math.random()*6).toFixed(1)}s"></i>`;
+  }
+  box.innerHTML = h;
+})();
+
+/* =========================================================================
+   EARTH — tiny orthographic globe
+   ========================================================================= */
+// Simplified continents, [lon,lat] pairs. Original simplification — not traced from any map product.
+const LAND = [
+ [-168,66,-140,70,-100,72,-80,68,-62,58,-55,50,-66,44,-76,35,-81,25,-90,29,-97,26,-97,19,-88,15,-80,8,-85,11,-92,15,-105,20,-112,30,-118,34,-124,40,-124,48,-135,58,-150,60,-165,60],
+ [-50,60,-42,60,-22,70,-20,80,-40,83,-60,80,-56,70],
+ [-80,8,-72,12,-60,10,-50,0,-35,-6,-40,-22,-48,-27,-58,-38,-65,-42,-68,-52,-74,-52,-72,-40,-71,-20,-76,-14,-81,-4],
+ [-10,36,-9,43,-2,44,-5,48,2,51,8,54,8,57,5,61,14,68,25,71,40,68,60,70,80,73,100,77,120,73,140,72,160,70,180,68,178,62,160,60,156,52,140,54,135,44,128,38,122,40,122,30,118,24,108,20,108,12,104,9,100,14,98,8,92,22,88,22,80,15,77,8,72,20,66,25,57,25,57,22,52,17,44,12,42,16,35,28,34,31,36,36,28,36,26,40,22,37,20,40,16,38,18,40,12,44,8,44,3,42,0,38,-6,36],
+ [-17,21,-10,30,-5,36,10,37,20,32,32,31,35,28,43,12,51,11,42,-2,40,-15,35,-24,30,-31,20,-35,17,-29,12,-17,13,-6,9,4,-8,4,-15,10],
+ [-5,50,1,51,0,54,-3,58,-6,56],
+ [44,-16,50,-15,47,-25,44,-23],
+ [114,-22,122,-18,130,-12,137,-12,142,-11,146,-19,153,-26,151,-34,146,-39,140,-38,135,-34,130,-32,115,-34,113,-26],
+ [172,-35,178,-38,174,-41,167,-46,171,-44],
+ [130,32,136,35,141,38,142,44,140,40,133,34],
+ [95,5,105,-6,115,-8,110,-7,100,0],
+ [109,1,117,7,119,0,115,-4,110,-3],
+ [131,-1,141,-3,150,-10,141,-9],
+ [-180,-72,-120,-74,-60,-66,0,-70,60,-67,120,-67,180,-72,180,-90,-180,-90]
+];
+const PLACES = { teh:[51.4,35.7], ger:[10.4,51.2], syd:[151.2,-33.9] };
+const R = 62, D = Math.PI/180;
+const DENSE = LAND.map(a => { const out=[]; for (let i=0;i<a.length;i+=2){ const x0=a[i],y0=a[i+1],j=(i+2)%a.length,x1=a[j],y1=a[j+1];
+  const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/4)); for(let k=0;k<n;k++) out.push([x0+(x1-x0)*k/n, y0+(y1-y0)*k/n]); } return out; });
+function proj(lon, lat, l0, p0, r=R){
+  const l=(lon-l0)*D, p=lat*D, q=p0*D;
+  const cosc = Math.sin(q)*Math.sin(p) + Math.cos(q)*Math.cos(p)*Math.cos(l);
+  let x = r*Math.cos(p)*Math.sin(l), y = -r*(Math.cos(q)*Math.sin(p) - Math.sin(q)*Math.cos(p)*Math.cos(l));
+  if (cosc < 0){ const m=Math.hypot(x,y)||1; x=x/m*r; y=y/m*r; }   // back side: pin to the limb
+  return [x, y, cosc];
+}
+const f = n => n.toFixed(1);
+let earthLon = 92, earthLat = 10;   // 92°E / 10°N shows Germany, Tehran and Sydney together
+function renderEarth(l0 = earthLon, p0 = earthLat){
+  let d = '';
+  for (const poly of DENSE){ let s='', front=0; for (const [lo,la] of poly){ const [x,y,c]=proj(lo,la,l0,p0); if(c>0) front++; s += (s?'L':'M')+f(x)+' '+f(y); } if(front) d += s+'Z'; }
+  $('#land').setAttribute('d', d);
+  let g='';
+  for (let lo=-180; lo<180; lo+=30){ let pen=false; for(let la=-80; la<=80; la+=5){ const [x,y,c]=proj(lo,la,l0,p0); if(c>0){ g+=(pen?'L':'M')+f(x)+' '+f(y); pen=true;} else pen=false; } }
+  for (let la=-60; la<=60; la+=30){ let pen=false; for(let lo=-180; lo<=180; lo+=5){ const [x,y,c]=proj(lo,la,l0,p0); if(c>0){ g+=(pen?'L':'M')+f(x)+' '+f(y); pen=true;} else pen=false; } }
+  $('#grat').setAttribute('d', g);
+  for (const k in PLACES){ const [x,y,c]=proj(...PLACES[k],l0,p0); const el=$('#pt-'+k);
+    el.setAttribute('transform',`translate(${f(x)} ${f(y)})`); el.style.opacity = c>0.06 ? Math.min(1,(c-0.06)*8) : 0; }
+}
+// great-circle arc Tehran → Germany → Sydney, lifted above the surface
+function slerp(a,b,t){ const v=ll=>[Math.cos(ll[1]*D)*Math.cos(ll[0]*D),Math.cos(ll[1]*D)*Math.sin(ll[0]*D),Math.sin(ll[1]*D)];
+  const A=v(a),B=v(b),w=Math.acos(A[0]*B[0]+A[1]*B[1]+A[2]*B[2]),s=Math.sin(w);
+  const P=A.map((ai,i)=>(Math.sin((1-t)*w)*ai+Math.sin(t*w)*B[i])/s); return [Math.atan2(P[1],P[0])/D, Math.asin(P[2])/D]; }
+function arcD(l0=earthLon,p0=earthLat){
+  let d=''; const legs=[[PLACES.teh,PLACES.ger],[PLACES.ger,PLACES.syd]];
+  legs.forEach(([a,b],li)=>{ for(let i=0;i<=40;i++){ const t=i/40, [lo,la]=slerp(a,b,t), lift=R*(1+ (li?0.20:0.12)*Math.sin(Math.PI*t));
+    const [x,y]=proj(lo,la,l0,p0,lift); d+=(d?'L':'M')+f(x)+' '+f(y);} });
+  return d;
+}
+let spinning = !RM, last = 0;
+function spin(t){ if(spinning && last && !document.hidden){ earthLon = (earthLon + (t-last)*0.006) % 360; renderEarth(); } last=t; requestAnimationFrame(spin); }
+renderEarth(); requestAnimationFrame(spin);
+document.addEventListener('visibilitychange',()=>{ last=0; });
+
+/* =========================================================================
+   SNOW + FROST
+   ========================================================================= */
+function buildSnow(n = 70){
+  const g = $('#snow'); let h='';
+  for (let i=0;i<n;i++){
+    const x = -128 + Math.random()*256, warm = x > 46;            // right third = Sydney sun side
+    const r = (0.7 + Math.random()*1.6).toFixed(2);
+    h += `<circle class="flake${warm?' warm':''}" r="${r}" fill="#fff" opacity="${(.55+Math.random()*.45).toFixed(2)}" style="--x:${x.toFixed(1)}px;--sway:${(-12+Math.random()*24).toFixed(1)}px;--dur:${(7+Math.random()*7).toFixed(1)}s;--delay:${(-Math.random()*14).toFixed(1)}s;--sdur:${(1.2+Math.random()*1.4).toFixed(2)}s;--a:${(Math.random()*360).toFixed(0)}deg;--rad:${(20+Math.random()*108).toFixed(0)}px"${RM?` transform="translate(${x.toFixed(1)} ${(-140+Math.random()*270).toFixed(1)})"`:''}/>`;
+  }
+  g.innerHTML = h;
+}
+buildSnow();
+function buildFerns(){
+  let seed = 11; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+  let d = '';
+  const branch = (x,y,a,len,depth) => { if (depth===0||len<3) return; const x2=x+Math.cos(a)*len, y2=y+Math.sin(a)*len; d+=`M${f(x)} ${f(y)}L${f(x2)} ${f(y2)}`;
+    const steps=3; for(let s=1;s<=steps;s++){ const px=x+(x2-x)*s/(steps+1), py=y+(y2-y)*s/(steps+1); branch(px,py,a-0.9,len*0.38,depth-1); branch(px,py,a+0.9,len*0.38,depth-1);} branch(x2,y2,a+(rnd()-.5)*.5,len*0.6,depth-1); };
+  for (let i=0;i<14;i++){ const ang = i/14*Math.PI*2 + rnd()*.3; const x=160+Math.cos(ang)*134, y=150+Math.sin(ang)*134; branch(x,y,ang+Math.PI+(rnd()-.5)*.6, 26+rnd()*22, 3); }
+  $('#ferns').innerHTML = `<path d="${d}" stroke-width=".7"/>`;
+}
+buildFerns();
+
+/* =========================================================================
+   DRIFTING LANGUAGE
+   ========================================================================= */
+const seg = ('Segmenter' in Intl) ? new Intl.Segmenter(undefined,{granularity:'grapheme'}) : null;
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function graphemes(w){ return seg ? [...seg.segment(w)].map(s=>s.segment) : [...w]; }
+// Latin: one span per letter, grouped per word so lines never break mid-word.
+// Persian: whole words only (per-letter spans would break Arabic-script joining).
+function paint(el, text, lang){
+  const html = text.split(/(\s+)/).filter(Boolean).map(tok => {
+    if (/^\s+$/.test(tok)) return ' ';
+    if (lang === 'fa') return `<span class="drift-ch">${esc(tok)}</span>`;
+    return `<span class="drift-w">${graphemes(tok).map(g=>`<span class="drift-ch">${esc(g)}</span>`).join('')}</span>`;
+  }).join('');
+  const home = el._home ?? text;
+  el.lang = lang; el.dir = dirOf(lang);
+  el.innerHTML = `<span class="sr" lang="${el._homeLang||lang}">${esc(home)}</span><span aria-hidden="true">${html}</span>`;
+}
+function setPlain(el, text, lang){
+  el._tok = (el._tok||0) + 1; el._home = text; el._homeLang = lang;
+  el.getAnimations({subtree:true}).forEach(a => a.cancel());
+  el.lang = lang; el.dir = dirOf(lang); el.textContent = text;
+}
+function drift(el, text, lang, total = 3000){
+  const tok = el._tok = (el._tok||0) + 1;
+  if (RM){
+    el.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'}).onfinish=()=>{ if(el._tok!==tok) return; paint(el,text,lang); el.getAnimations().forEach(a=>a.cancel()); el.animate([{opacity:0},{opacity:1}],{duration:300}); };
+    return;
+  }
+  if (!el.querySelector('.drift-ch')) paint(el, el.textContent, el.lang || 'en');
+  const out = [...el.querySelectorAll('.drift-ch')], half = total*0.45;
+  out.forEach(s => s.animate([
+      {opacity:1, filter:'blur(0)', transform:'translate(0,0)'},
+      {opacity:0, filter:'blur(6px)', transform:`translate(${(Math.random()*12-6).toFixed(1)}px,${(-8-Math.random()*10).toFixed(1)}px) rotate(${(Math.random()*20-10).toFixed(0)}deg)`}
+    ], {duration: half*0.6, delay: Math.random()*half*0.4, easing:'cubic-bezier(.55,0,.75,.2)', fill:'forwards'}));
+  setTimeout(() => {
+    if (el._tok !== tok) return;
+    paint(el, text, lang);
+    [...el.querySelectorAll('.drift-ch')].forEach(s => s.animate([
+        {opacity:0, filter:'blur(6px)', transform:`translateY(${(6+Math.random()*8).toFixed(1)}px)`},
+        {opacity:1, filter:'blur(0)', transform:'none'}
+      ], {duration: half*0.6, delay: Math.random()*half*0.4, easing:'cubic-bezier(.22,1,.36,1)', fill:'backwards'}));
+  }, half + total*0.1);
+}
+// quick 250 ms crossfade back to the home language
+function snap(el, text, lang){
+  setPlain(el, text, lang);
+  if (!RM) el.animate([{opacity:.15},{opacity:1}],{duration:250,easing:'ease-out'});
+}
+
+let driftIdx = 0, driftTimer = 0;
+const IDLE_MS = 8000, DRIFT_MS = 3000;
+function driftSeq(){ return scene === 'welcome' ? GREET_SEQ : (me ? personOf(me).langs : ['en']); }
+function driftTargets(){
+  if (scene === 'welcome') return [$('#hello')];
+  const panel = $('.p-' + scene); return panel ? [...panel.querySelectorAll('[data-drift]')] : [];
+}
+function scheduleDrift(){
+  clearTimeout(driftTimer);
+  if (driftSeq().length > 1 && driftTargets().length) driftTimer = setTimeout(driftStep, IDLE_MS);
+}
+function driftStep(){
+  const seq = driftSeq(); if (seq.length < 2) return;
+  driftIdx = (driftIdx + 1) % seq.length; const lang = seq[driftIdx];
+  driftTargets().forEach(el => drift(el, t(el.dataset.drift, lang), lang, DRIFT_MS));
+  driftTimer = setTimeout(driftStep, IDLE_MS + DRIFT_MS);
+}
+function resetDrift(animate){
+  const lang = scene === 'welcome' ? 'en' : homeLang();
+  if (driftIdx !== 0 || !animate){
+    driftTargets().forEach(el => (animate ? snap : setPlain)(el, t(el.dataset.drift, lang), lang));
+  }
+  driftIdx = 0; scheduleDrift();
+}
+['pointerdown','keydown','input','wheel','touchstart'].forEach(ev => addEventListener(ev, () => resetDrift(true), {passive:true, capture:true}));
+addEventListener('scroll', () => resetDrift(true), {passive:true});
+
+/* =========================================================================
+   LANGUAGE APPLICATION (home language for the chosen person)
+   ========================================================================= */
+function deadlineDate(lang){
+  return new Intl.DateTimeFormat(LOCALE[lang] || 'en-AU', {day:'numeric', month:'long', year:'numeric', timeZone:'Australia/Sydney'}).format(new Date(deadlineMs));
+}
+function applyLang(){
+  const L = homeLang();
+  document.documentElement.lang = L;
+  $$('.panel').forEach(p => { const l = p.classList.contains('p-welcome') ? 'en' : L; p.lang = l; p.dir = dirOf(l); });
+  const langOf = el => el.closest('.panel')?.lang || L;
+  $$('[data-t]').forEach(el => { el.textContent = t(el.dataset.t, langOf(el)); });
+  $$('[data-tp]').forEach(el => { el.placeholder = t(el.dataset.tp, langOf(el)); });
+  $$('.panel:not(.p-welcome) [data-drift]').forEach(el => setPlain(el, t(el.dataset.drift, L), L));
+  setPlain($('#hello'), t('greeting','en'), 'en');
+  $('#deadlineText').textContent = t('deadline', L, {date: deadlineDate(L)});
+  $('#toastRetry').textContent = t('retry', L);
+  $('.who').textContent = me || '';
+  $('#budget').textContent = BUDGET;
+  updateCounter(letterCount(), false);
+}
+
+/* =========================================================================
+   LETTERS BACKEND (Google Sheet via Apps Script, or demo localStorage)
+   ========================================================================= */
+function clean(s){ return String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80); }
+function normalize(list){
+  const out = {};
+  (Array.isArray(list) ? list : []).forEach(l => {
+    if (!l || !personOf(l.name)) return;
+    const w1 = clean(l.wish1), w2 = clean(l.wish2);
+    if (w1 || w2) out[l.name] = { wish1: w1, wish2: w2 };
+  });
+  return out;
+}
+function demoAll(){ try { return JSON.parse(store.get(K_DEMO) || '{}') || {}; } catch { return {}; } }
+async function withTimeout(promiseFn, ms = 15000){
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), ms);
+  try { return await promiseFn(ctl.signal); } finally { clearTimeout(tm); }
+}
+async function fetchLetters(){
+  if (DEMO){ const all = demoAll(); return normalize(Object.keys(all).map(name => ({ name, ...all[name] }))); }
+  const url = SHEET_URL + (SHEET_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+  const j = await withTimeout(async signal => { const r = await fetch(url, { cache:'no-store', signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  if (!j || !j.ok) throw new Error('Bad reply');
+  return normalize(j.letters);
+}
+async function saveLetter(name, wish1, wish2){
+  if (DEMO){ const all = demoAll(); all[name] = { wish1, wish2, updated: new Date().toISOString() }; store.set(K_DEMO, JSON.stringify(all)); await sleep(250); return; }
+  const j = await withTimeout(async signal => {
+    const r = await fetch(SHEET_URL, { method:'POST', body: JSON.stringify({ name, wish1, wish2 }), headers:{ 'Content-Type':'text/plain;charset=utf-8' }, signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
+  });
+  if (!j || !j.ok) throw new Error((j && j.error) || 'Save failed');
+}
+async function loadLetters(silent){
+  try { letters = await fetchLetters(); lettersLoaded = true; hideToast(); updateCounter(letterCount(), lettersLoaded); return true; }
+  catch (e) { if (!silent) showToast(); return false; }
+}
+
+/* ---------- friendly error toast ---------- */
+let toastRetry = null;
+function showToast(retry){
+  toastRetry = retry || toastRetry;
+  $('#toastMsg').textContent = t('netErr', homeLang());
+  $('#toastRetry').textContent = t('retry', homeLang());
+  const tt = $('#toast'); tt.lang = homeLang(); tt.dir = dirOf(homeLang());
+  tt.hidden = false;
+}
+function hideToast(){ $('#toast').hidden = true; }
+$('#toastRetry').onclick = () => { hideToast(); if (toastRetry) toastRetry(); };
+
+/* =========================================================================
+   THE DRAW (decoded only for the person who is looking)
+   ========================================================================= */
+function recipientOf(name){
+  try {
+    if (!DRAW) return null;
+    const bin = atob(DRAW), bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+    const k = bytes[0], key = bytes.subarray(1, 1 + k), body = bytes.subarray(1 + k);
+    const plain = body.map((b, i) => b ^ key[i % k]);
+    const r = JSON.parse(new TextDecoder().decode(plain))[name];
+    return personOf(r) && r !== name ? r : null;
+  } catch { return null; }
+}
+
+/* =========================================================================
+   LAMPS + COUNTER
+   ========================================================================= */
+let shownCount = -1;
+function setLamps(n, pulse){
+  $$('.lamp').forEach((l, i) => {
+    const was = l.classList.contains('on'), on = i < n;
+    l.classList.toggle('on', on);
+    if (pulse && on && !was && !RM) l.animate([{transform:'scale(1)'},{transform:'scale(1.6)'},{transform:'scale(1)'}],{duration:500,delay:(i-shownCount)*120,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  });
+}
+function updateCounter(n, pulse){
+  const L = homeLang(), fmt = nf(L);
+  const el = $('#count'), changed = shownCount !== -1 && n !== shownCount;
+  setLamps(n, pulse && changed);
+  $('#ofTotal').textContent = t('of', L, {total: fmt.format(TOTAL)});
+  $('#counter').setAttribute('aria-label', t('lettersAria', L, {n: fmt.format(n), total: fmt.format(TOTAL)}));
+  if (changed && pulse && !RM){
+    el.animate([{opacity:1},{opacity:0}],{duration:150}).onfinish = () => { el.textContent = fmt.format(n); el.animate([{opacity:0},{opacity:1}],{duration:150}); };
+  } else el.textContent = fmt.format(n);
+  shownCount = n;
+}
+
+/* =========================================================================
+   SCENES
+   ========================================================================= */
+let pollTimer = 0, unlocking = false, shaking = false;
+function go(next, { back = false } = {}){
+  scene = next;
+  stage.classList.toggle('back', back);
+  stage.dataset.scene = next;
+  applyLang();
+  svg.classList.toggle('is-frosted', next === 'waiting');
+  svg.classList.remove('show-labels', 'swirling');
+  $('#snow').classList.remove('swirl');
+  $('#ferns').style.opacity = '';
+  const arc = $('#arcPath'); arc.getAnimations().forEach(a => a.cancel()); arc.style.strokeDashoffset = '';
+  $('#spark').setAttribute('opacity', 0);
+  if (next === 'reveal' || RM){ spinning = false; earthLon = 92; renderEarth(); }
+  else spinning = true;
+  if (next === 'reveal'){ arc.setAttribute('d', arcD()); arc.style.strokeDashoffset = 0; svg.classList.add('show-labels'); }
+
+  // the globe becomes a button only while it is waiting to be shaken
+  if (next === 'shake'){
+    globeWrap.setAttribute('role', 'button'); globeWrap.tabIndex = 0;
+    globeWrap.setAttribute('aria-label', t('shakeTitle', homeLang()));
+    const late = letterCount() < TOTAL;
+    const eb = $('#shakeEyebrow'); eb.dataset.drift = late ? 'shakeLate' : 'shakeAll'; setPlain(eb, t(eb.dataset.drift, homeLang()), homeLang());
+  } else { globeWrap.removeAttribute('role'); globeWrap.removeAttribute('tabindex'); globeWrap.removeAttribute('aria-label'); }
+
+  clearInterval(pollTimer);
+  if (next === 'waiting') pollTimer = setInterval(refresh, POLL_MS);
+  if (next === 'welcome'){ $('#names').classList.remove('picking'); $$('.name-btn').forEach(b => b.setAttribute('aria-pressed', 'false')); }
+
+  scrollTo({ top: 0 });
+  driftIdx = 0; scheduleDrift();
+  const focusEl = { loading:'.p-loading .lede', welcome:'#hello', letter:'#dear', waiting:'#waitTop', shake:'#shakeTitle', reveal:'#rcpt' }[next];
+  if (focusEl && document.activeElement && document.activeElement !== document.body) $(focusEl)?.focus({ preventScroll:true });
+}
+function routeFor(){
+  if (!me) return 'welcome';
+  if (unlocked()) return store.get(K_REVEALED) === me ? 'reveal' : 'shake';
+  return letters[me] ? 'waiting' : 'letter';
+}
+async function loadThenRoute(){
+  go('loading');
+  if (await loadLetters()) enter(routeFor());
+  else toastRetry = loadThenRoute;
+}
+// enter a scene with its setup
+function enter(next, opts){
+  if (next === 'letter') prefillLetter();
+  go(next, opts);
+  if (next === 'reveal'){ fillReveal(); showCardNow(); }
+}
+
+/* ---------- welcome / name pick ---------- */
+function buildNames(){
+  const box = $('#names'); box.innerHTML = '';
+  PEOPLE.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'name-btn' + (i === PEOPLE.length - 1 && PEOPLE.length % 2 ? ' full' : '');
+    b.textContent = p.name; b.setAttribute('aria-pressed', 'false'); b.style.setProperty('--i', i);
+    b.onclick = () => pick(p.name, b);
+    box.appendChild(b);
+  });
+}
+let picking = false;
+async function pick(name, btn){
+  if (picking) return; picking = true;
+  $$('.name-btn').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  btn.setAttribute('aria-pressed', 'true'); $('#names').classList.add('picking');
+  me = name; store.set(K_ME, name);
+  await sleep(RM ? 150 : 450);
+  picking = false;
+  if (!lettersLoaded) return loadThenRoute();
+  enter(routeFor());
+}
+
+/* ---------- letter ---------- */
+const w1 = $('#w1'), w2 = $('#w2');
+function prefillLetter(){
+  const l = letters[me];
+  w1.value = l ? l.wish1 : ''; w2.value = l ? l.wish2 : '';
+  [w1, w2].forEach(i => { i.closest('.field').classList.remove('invalid'); i.removeAttribute('aria-invalid'); countChars(i); });
+  const letter = $('#letter'); letter.getAnimations().forEach(a => a.cancel()); letter.style.opacity = '';
+}
+function countChars(i){ i.nextElementSibling.textContent = `${i.value.length}/80`; }
+[w1, w2].forEach(i => i.addEventListener('input', () => { countChars(i); if (i.value.trim()){ i.closest('.field').classList.remove('invalid'); i.removeAttribute('aria-invalid'); } }));
+let sending = false;
+$('#letter').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (sending) return;
+  const v1 = clean(w1.value), v2 = clean(w2.value);
+  let firstBad = null;
+  [[w1, v1], [w2, v2]].forEach(([i, v]) => { const bad = !v; i.closest('.field').classList.toggle('invalid', bad); bad ? i.setAttribute('aria-invalid', 'true') : i.removeAttribute('aria-invalid'); if (bad && !firstBad) firstBad = i; });
+  if (firstBad){ firstBad.focus(); return; }
+  sending = true;
+  const btn = $('#sendBtn'), label = $('#sendLabel');
+  btn.disabled = true; label.textContent = t('sending', homeLang());
+  try { await saveLetter(me, v1, v2); }
+  catch (err) {
+    sending = false; btn.disabled = false; label.textContent = t('send', homeLang());
+    showToast(() => $('#letter').requestSubmit());
+    return;
+  }
+  hideToast();
+  const wasUnlocked = unlocked();
+  letters[me] = { wish1: v1, wish2: v2 };
+  await playEnvelope();
+  sending = false; btn.disabled = false; label.textContent = t('send', homeLang());
+  if (wasUnlocked) return enter(routeFor());     // an edit after the globe already cleared
+  go('waiting');
+  checkUnlock(1200);
+});
+
+/* ---------- envelope flight ---------- */
+function playEnvelope(){
+  return new Promise(resolve => {
+    const env = $('#envelope'), letter = $('#letter');
+    const arrive = () => { svg.animate([{filter:'brightness(1)'},{filter:'brightness(1.5) drop-shadow(0 0 24px rgba(234,198,126,.8))'},{filter:'brightness(1)'}],{duration:900}); updateCounter(letterCount(), true); };
+    if (RM){ letter.animate([{opacity:1},{opacity:.4}],{duration:200,fill:'forwards'}); arrive(); setTimeout(resolve, 700); return; }
+    const gr = svg.getBoundingClientRect(), er = env.getBoundingClientRect();
+    const tx = gr.left + gr.width/2 - (er.left + er.width/2), ty = gr.top + gr.height*0.35 - (er.top + er.height/2);
+    letter.animate([{transform:'rotate(-.6deg)',opacity:1},{transform:'translateY(40px) scale(.6,.25)',opacity:0}],{duration:600,easing:'cubic-bezier(.65,0,.35,1)',fill:'forwards'});
+    env.animate([
+      {opacity:0, transform:'translateY(60px) scale(.9)'},
+      {opacity:1, transform:'translateY(0) scale(1)', offset:.25},
+      {opacity:1, transform:'translateY(0) scale(1)', offset:.42},
+      {opacity:1, transform:`translate(${tx*0.4}px,${ty*0.5 - 90}px) scale(.7) rotate(-12deg)`, offset:.7},
+      {opacity:0, transform:`translate(${tx}px,${ty}px) scale(.08) rotate(-30deg)`}
+    ],{duration:2600, delay:350, easing:'cubic-bezier(.45,0,.25,1)', fill:'forwards'});
+    const flap = $('#envFlap'); flap.style.transformOrigin = '110px 12px';
+    flap.animate([{transform:'scaleY(-1)'},{transform:'scaleY(1)'}],{duration:420,delay:700,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'backwards'});
+    $('#envSeal').animate([{transform:'scale(1.4)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:250,delay:1120,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'backwards'});
+    setTimeout(() => { arrive();
+      setTimeout(() => { letter.getAnimations().forEach(a=>a.cancel()); env.getAnimations().forEach(a=>a.cancel()); resolve(); }, 700); }, 3000);
+  });
+}
+
+/* ---------- waiting: poll + unlock ---------- */
+async function refresh(){
+  if (scene !== 'waiting') return;
+  if (await loadLetters(true)) updateCounter(letterCount(), true);
+  checkUnlock(600);
+}
+function checkUnlock(delay){
+  if (scene !== 'waiting' || unlocking || !unlocked()) return;
+  unlocking = true;
+  setTimeout(() => {
+    if (scene !== 'waiting'){ unlocking = false; return; }
+    $('#ferns').animate([{opacity:.75},{opacity:0}],{duration:RM?200:1200,fill:'forwards'});
+    svg.classList.remove('is-frosted');                     // frost fades out (1.6 s transition)
+    setTimeout(() => { unlocking = false; $('#ferns').getAnimations().forEach(a=>a.cancel()); if (scene === 'waiting') go('shake'); }, RM ? 300 : 1800);
+  }, delay || 0);
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+addEventListener('storage', e => { if (DEMO && e.key === K_DEMO) refresh(); });
+
+/* ---------- shake → arc → reveal ---------- */
+function playShake(){
+  return new Promise(resolve => {
+    globeWrap.classList.remove('shaking'); void globeWrap.offsetWidth; if (!RM) globeWrap.classList.add('shaking');
+    const snow = $('#snow');
+    if (!RM){ snow.classList.add('swirl'); svg.classList.add('swirling'); }
+    spinning = false; const from = earthLon, to = 92 + 360*Math.ceil((from-92)/360 + .5);  // always roll forward
+    const t0 = performance.now(), dur = RM ? 1 : 1800;
+    (function roll(t){ const k=Math.min(1,Math.max(0,(t-t0)/dur)), e=1-Math.pow(1-k,3); earthLon = from + (to-from)*e; renderEarth(); if(k<1) requestAnimationFrame(roll); else { earthLon=92; renderEarth(); drawArc(resolve); } })(t0);
+    setTimeout(()=>{ snow.classList.remove('swirl'); svg.classList.remove('swirling'); }, RM?0:2400);  // snow settles
+  });
+}
+function drawArc(done){
+  const arc = $('#arcPath'); arc.setAttribute('d', arcD()); svg.classList.add('show-labels');
+  if (RM){ arc.style.strokeDashoffset = 0; setTimeout(done, 600); return; }
+  arc.animate([{strokeDashoffset:1},{strokeDashoffset:0}],{duration:2600,easing:'cubic-bezier(.65,0,.35,1)',fill:'forwards'});
+  const spark = $('#spark'), L = arc.getTotalLength(), t0 = performance.now();
+  (function run(t){ const k=Math.min(1,Math.max(0,(t-t0)/2600)), e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2, p=arc.getPointAtLength(e*L);
+    spark.setAttribute('cx',p.x); spark.setAttribute('cy',p.y); spark.setAttribute('opacity', k<1?1:0); if(k<1) requestAnimationFrame(run); else setTimeout(done, 300); })(t0);
+}
+async function doShake(){
+  if (scene !== 'shake' || shaking) return;
+  shaking = true; globeWrap.classList.remove('dragging'); globeWrap.style.transform = '';
+  const fresh = loadLetters(true);                 // get the latest wishes while the snow swirls
+  await playShake();
+  await Promise.race([fresh, sleep(3000)]);
+  shaking = false;
+  store.set(K_REVEALED, me);
+  go('reveal'); fillReveal(); playUntie();
+}
+$$('[data-act="shake"]').forEach(b => b.addEventListener('click', () => { askMotion(); doShake(); }));
+globeWrap.addEventListener('click', () => { if (scene === 'shake') doShake(); });
+globeWrap.addEventListener('keydown', e => { if (scene === 'shake' && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); doShake(); } });
+// drag the globe: rotate with the pointer, shake once it has moved far enough
+let drag = null;
+globeWrap.addEventListener('pointerdown', e => { if (scene !== 'shake' || shaking) return; drag = { x: e.clientX, id: e.pointerId }; });
+globeWrap.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x; if (Math.abs(dx) < 4) return;
+  if (!globeWrap.classList.contains('dragging')){ globeWrap.classList.add('dragging'); try { globeWrap.setPointerCapture(e.pointerId); } catch {} }
+  globeWrap.style.transform = `rotate(${Math.max(-10, Math.min(10, dx/6)).toFixed(1)}deg)`;
+  if (Math.abs(dx) > 40){ drag = null; doShake(); }
+});
+const endDrag = () => { drag = null; if (!shaking){ globeWrap.classList.remove('dragging'); globeWrap.style.transform = ''; } };
+globeWrap.addEventListener('pointerup', endDrag); globeWrap.addEventListener('pointercancel', endDrag);
+// optional: a real shake of the phone
+let motionAsked = false;
+function askMotion(){
+  if (motionAsked || typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function') return;
+  motionAsked = true; DeviceMotionEvent.requestPermission().catch(() => {});
+}
+addEventListener('devicemotion', e => {
+  if (scene !== 'shake' || shaking) return;
+  const a = e.acceleration, g = e.accelerationIncludingGravity;
+  const mag = a && a.x != null ? Math.hypot(a.x, a.y, a.z) : g && g.x != null ? Math.abs(Math.hypot(g.x, g.y, g.z) - 9.81) : 0;
+  if (mag > 15) doShake();
+});
+
+/* ---------- reveal ---------- */
+function fillReveal(){
+  const L = homeLang(), r = recipientOf(me);
+  const rc = $('#rcpt'), list = $('#wishes');
+  list.innerHTML = '';
+  const line = text => { const li = document.createElement('li'); const sp = document.createElement('span'); sp.className = 'none'; sp.textContent = text; li.appendChild(sp); list.appendChild(li); };
+  if (!r){ rc.textContent = '✶'; line(t('drawMissing', L)); return; }
+  rc.textContent = r;
+  const l = letters[r];
+  if (!l){ line(t('noLetter', L)); return; }
+  [['i.', l.wish1], ['ii.', l.wish2]].filter(([, w]) => w).forEach(([n, w]) => {
+    const li = document.createElement('li'), b = document.createElement('b'), sp = document.createElement('span');
+    b.textContent = n; b.setAttribute('aria-hidden', 'true'); b.dir = 'ltr'; sp.textContent = w; sp.lang = ''; sp.dir = 'auto';
+    // lay the line out in the direction of what was written (Farsi wish → numeral on the right)
+    const strong = w.match(/[A-Za-z\u00C0-\u024F\u0590-\u08FF\uFB1D-\uFEFC]/);
+    li.dir = strong && /[\u0590-\u08FF\uFB1D-\uFEFC]/.test(strong[0]) ? 'rtl' : 'ltr';
+    li.append(b, sp); list.appendChild(li);
+  });
+}
+function showCardNow(){
+  const gift = $('#gift'), card = $('#card');
+  card.getAnimations().forEach(a => a.cancel()); card.style.opacity = 1; gift.style.opacity = 0;
+}
+function playUntie(){
+  const gift = $('#gift'), card = $('#card'), o = {fill:'forwards'};
+  [...gift.querySelectorAll('*')].forEach(e=>e.getAnimations().forEach(a=>a.cancel())); gift.getAnimations().forEach(a=>a.cancel());
+  if (RM){ gift.style.opacity = 0; card.style.opacity = 1; card.animate([{opacity:0},{opacity:1}],{duration:300}); return; }
+  gift.style.opacity = 1; card.style.opacity = 0;
+  gift.animate([{transform:'none'},{transform:'rotate(-3deg)'},{transform:'rotate(3deg)'},{transform:'rotate(-1.5deg)'},{transform:'none'}],{duration:600,delay:50,easing:'ease-in-out'});  // anticipation wiggle
+  $('#loopL').animate([{transform:'none'},{transform:'translate(-30px,-6px) rotate(-70deg) scale(.4)',opacity:0}],{duration:700,delay:700,easing:'cubic-bezier(.65,0,.35,1)',...o});
+  $('#loopR').animate([{transform:'none'},{transform:'translate(30px,-6px) rotate(70deg) scale(.4)',opacity:0}],{duration:700,delay:760,easing:'cubic-bezier(.65,0,.35,1)',...o});
+  $('#tailL').animate([{transform:'none'},{transform:'translate(-40px,60px) rotate(-30deg)',opacity:0}],{duration:800,delay:920,easing:'cubic-bezier(.55,0,.75,.2)',...o});
+  $('#tailR').animate([{transform:'none'},{transform:'translate(40px,60px) rotate(30deg)',opacity:0}],{duration:800,delay:920,easing:'cubic-bezier(.55,0,.75,.2)',...o});
+  $('#bow').animate([{opacity:1},{opacity:0}],{duration:300,delay:1300,...o});
+  $('#ribV').animate([{transform:'none',opacity:1},{transform:'translateY(40px)',opacity:0}],{duration:500,delay:1300,...o});
+  $('#gLidG').animate([{transform:'none'},{transform:'translate(-30px,-90px) rotate(-18deg)',opacity:0}],{duration:900,delay:1600,easing:'cubic-bezier(.22,1,.36,1)',...o});
+  $('#gBody').animate([{transform:'none',opacity:1},{transform:'translateY(50px) scale(.95)',opacity:0}],{duration:400,delay:1750,easing:'cubic-bezier(.55,0,.75,.2)',...o});
+  card.animate([{opacity:0,transform:'translateY(40px) scale(.92)'},{opacity:1,transform:'none'}],{duration:900,delay:1900,easing:'cubic-bezier(.34,1.56,.64,1)',fill:'forwards'})
+      .onfinish = () => { card.getAnimations().forEach(a=>a.cancel()); card.style.opacity = 1; gift.style.opacity = 0; };
+}
+
+/* ---------- links ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'notyou'){
+    me = null; store.del(K_ME); store.del(K_REVEALED); hideToast();
+    go('welcome', { back: true });
+  } else if (act === 'edit'){
+    enter('letter');
+    setTimeout(() => w1.focus({ preventScroll:true }), RM ? 0 : 700);
+  } else if (act === 'replay'){
+    go('shake'); doShake();
+  }
+});
+
+/* =========================================================================
+   BOOT
+   ========================================================================= */
+(function boot(){
+  if (DEMO) $('#demoBadge').hidden = false;
+  buildNames();
+  if (!RM){ globeWrap.classList.add('enter'); setTimeout(() => globeWrap.classList.remove('enter'), 1000); }
+  if (!me){ go('welcome'); loadLetters(true); return; }
+  loadThenRoute();
+})();
+</script>
+</body>
+</html>
